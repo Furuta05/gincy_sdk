@@ -1,0 +1,1 @@
+return {id="protected_module",name="protected_module",author="Gincy",version="1.0.0",requires={gincy=">=3.2.0 <4.0.0",api=">=1.1.0 <2.0.0"},dependencies={},capabilities={},reload="MODULE_HOT_SWAP",entrypoints={"sv_init.lua"},protection={server="maximum",client="open",drm=false}}

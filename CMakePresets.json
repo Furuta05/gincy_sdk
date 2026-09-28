@@ -1,0 +1,61 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 20, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "win32-release",
+      "displayName": "Windows x86 Release (static)",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "Win32",
+      "binaryDir": "${sourceDir}/../build-win32",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "GINCY_EXPECT_ARCH": "32",
+        "GINCY_STATIC_RUNTIME": "ON",
+        "GINCY_DELAYLOAD_LIBPQ": "ON",
+        "VCPKG_TARGET_TRIPLET": "x86-windows-static"
+      }
+    },
+    {
+      "name": "win64-release",
+      "displayName": "Windows x64 Release (static)",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/../build-win64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "GINCY_EXPECT_ARCH": "64",
+        "GINCY_STATIC_RUNTIME": "ON",
+        "GINCY_DELAYLOAD_LIBPQ": "ON",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+      }
+    },
+    {
+      "name": "linux32-release",
+      "displayName": "Linux x86 Release",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/../build-linux32",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "GINCY_EXPECT_ARCH": "32",
+        "CMAKE_CXX_FLAGS": "-m32"
+      }
+    },
+    {
+      "name": "linux64-release",
+      "displayName": "Linux x64 Release",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/../build-linux64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "GINCY_EXPECT_ARCH": "64"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "win32-release", "configurePreset": "win32-release", "configuration": "Release" },
+    { "name": "win64-release", "configurePreset": "win64-release", "configuration": "Release" },
+    { "name": "linux32-release", "configurePreset": "linux32-release" },
+    { "name": "linux64-release", "configurePreset": "linux64-release" }
+  ]
+}

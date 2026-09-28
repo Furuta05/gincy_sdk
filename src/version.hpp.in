@@ -1,0 +1,11 @@
+#pragma once
+namespace gincy {
+inline constexpr const char* kProduct = "@GINCY_PRODUCT@";
+inline constexpr const char* kFrameworkAPI = "@GINCY_FRAMEWORK_API@";
+inline constexpr int kNativeABI = @GINCY_NATIVE_ABI@;
+inline constexpr int kPackageFormat = @GINCY_PACKAGE_FORMAT@;
+inline constexpr int kNetworkProtocol = @GINCY_NETWORK_PROTOCOL@;
+inline constexpr int kManagementAPI = @GINCY_MANAGEMENT_API@;
+inline constexpr int kContentSchemaAPI = @GINCY_CONTENT_SCHEMA_API@;
+inline constexpr const char* kChannel = "@GINCY_CHANNEL@";
+}

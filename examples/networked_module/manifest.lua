@@ -1,0 +1,1 @@
+return {id="networked_module",name="networked_module",author="Gincy",version="1.0.0",requires={gincy=">=3.1.0 <4.0.0",api=">=1.1.0 <2.0.0"},dependencies={},capabilities={"network.register"},reload="MODULE_HOT_SWAP",entrypoints={"sh_init.lua"}}

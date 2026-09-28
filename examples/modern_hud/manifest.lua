@@ -1,0 +1,1 @@
+return {id="modern_hud",name="modern_hud",author="Gincy",version="1.0.0",requires={gincy=">=3.1.0 <4.0.0",api=">=1.1.0 <2.0.0"},dependencies={},capabilities={},reload="MODULE_HOT_SWAP",entrypoints={"cl_init.lua"}}

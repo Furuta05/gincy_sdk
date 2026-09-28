@@ -1,0 +1,10 @@
+{
+  "product": "3.2.0",
+  "framework_api": "1.1.0",
+  "native_abi": 2,
+  "package_format": 2,
+  "network_protocol": 2,
+  "management_api": 1,
+  "content_schema_api": 1,
+  "channel": "release"
+}

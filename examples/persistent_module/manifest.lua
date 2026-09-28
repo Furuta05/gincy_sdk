@@ -1,0 +1,1 @@
+return {id="persistent_module",name="persistent_module",author="Gincy",version="1.0.0",requires={gincy=">=3.1.0 <4.0.0",api=">=1.1.0 <2.0.0"},dependencies={},capabilities={"persistence.write"},reload="MODULE_HOT_SWAP",entrypoints={"sv_init.lua"}}

@@ -1,0 +1,10 @@
+function MODULE:RegisterDefinitions(ctx)
+    ctx.Items:Register("apple", {name = "Яблоко", stack = 20, weight = 0.2, model = "models/props/cs_italy/orange.mdl"})
+    ctx.Items:Register("wood", {name = "Древесина", stack = 20, weight = 1, model = "models/props_debris/wood_board04a.mdl"})
+    ctx.Items:Register("iron_ore", {name = "Железная руда", stack = 10, weight = 2, model = "models/props_junk/rock001a.mdl"})
+    ctx.Attributes:Register("endurance", {name = "Выносливость", default = 10, min = 1, max = 100})
+    ctx.Skills:Register("gathering", {name = "Сбор ресурсов", maxLevel = 20, xpPerLevel = 25})
+    ctx.Status:Register("exhausted", {name = "Усталость", persistence = "session", maxStacks = 1, movement = {speed = 0.85, acceleration = 0.8}})
+    ctx.WorldObjects:RegisterType("resource_node", {name = "Ресурсный узел", entity = "prop_dynamic", model = "models/props_junk/wood_crate001a.mdl"})
+    ctx.Activities:RegisterType("resource_delivery", {name = "Поставка древесины", requirements = {wood = 5}, reward = 25})
+end
