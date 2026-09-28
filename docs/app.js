@@ -1,0 +1,2 @@
+const search=document.querySelector('#apiSearch');if(search){search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();document.querySelectorAll('.api-item').forEach(x=>{x.classList.toggle('hidden',q&&!x.textContent.toLowerCase().includes(q))})})}
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{await navigator.clipboard.writeText(b.dataset.copy);const old=b.textContent;b.textContent='Скопировано';setTimeout(()=>b.textContent=old,1200)}));
