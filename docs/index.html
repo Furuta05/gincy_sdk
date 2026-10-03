@@ -1,82 +1,37 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Gincy — open-source framework для Garry's Mod: модули, безопасные таймеры, сеть, контент, storage, hot reload и .gmod."><title>Gincy — open-source framework для Garry's Mod</title><link rel="stylesheet" href="style.css"></head><body>
-<header class="top"><div class="topin"><a class="brand" href="index.html">Gincy SDK</a><span class="version">3.3.0 / API 1.1</span><nav class="nav"><a href="#what">Что это</a><a href="#start">Начать</a><a href="#content">Контент</a><a class="button" href="api.html">API</a></nav></div></header>
-<main><div class="hero"><div><div class="eyebrow">Garry's Mod · GLua · Open Source</div><h1>Пиши игровые системы. Инфраструктуру берёт на себя Gincy.</h1><p class="lead">Gincy — open-source framework для Garry's Mod. Ты продолжаешь писать обычный GLua, но получаешь готовые модули, автоматическую очистку hooks и задач, централизованный scheduler, проверяемую сеть, PostgreSQL, изменяемый контент, hot reload, диагностику и production-пакеты <code>.gmod</code>.</p><div class="actions"><a class="button" href="api.html">Открыть API</a><a class="button secondary" href="https://github.com/Furuta05/gincy_sdk">GitHub</a><a class="button secondary" href="#start">Пример за минуту</a></div></div><div class="terminal"><div class="termhead">Обычный Gincy-модуль</div><pre><code>local MOD = Gincy.Module("stamina")
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Gincy — набор инструментов для обычного GLua на сервере Garry's Mod."><title>Gincy — инструменты для GLua</title><link rel="stylesheet" href="style.css?v=3.3.1"></head><body>
+<header class="top"><div class="topin"><a class="brand" href="index.html">Gincy SDK</a><span class="version">3.3.0 / API 1.1.0</span><nav class="nav"><a href="#what">Что это</a><a href="#start">Начать</a><a href="#content">Контент</a><a class="button" href="api.html">API</a></nav></div></header>
+<main><div class="hero"><div><div class="eyebrow">Garry's Mod · обычный GLua</div><h1>Пиши аддон как обычно. Gincy убирает за тобой хуки, таймеры и сеть.</h1><p class="lead">Gincy не заменяет Lua и не учит новому языку. Ты по-прежнему вызываешь <code>PlayerSpawn</code>, читаешь <code>ply:Nick()</code> и пишешь обычные функции. Разница в том, что хук, повтор задачи и сетевое сообщение можно повесить на модуль: при перезагрузке модуля Gincy их снимет.</p><div class="actions"><a class="button" href="api.html">Открыть API</a><a class="button secondary" href="https://github.com/Furuta05/gincy_sdk">GitHub</a><a class="button secondary" href="#start">Пример за минуту</a></div></div><div class="terminal"><div class="termhead">Модуль выносливости</div><pre><code>local MOD = Gincy.Module("stamina")
 
 MOD:Hook("PlayerSpawn", function(ply)
-    -- обычный GLua
+    ply:SetNWInt("Stamina", 100)
 end)
 
-MOD:PlayersEvery("regen", 0.25, {
-    spread = true
-}, function(ply)
-    -- Gincy сам планирует работу
+MOD:PlayersEvery("regen", 0.25, {spread = true}, function(ply)
+    local value = ply:GetNWInt("Stamina", 0)
+    if value < 100 then ply:SetNWInt("Stamina", value + 1) end
 end)</code></pre></div></div>
-<div class="layout"><aside class="toc"><a href="#what">Что такое Gincy</a><a href="#gives">Что он даёт</a><a href="#start">Пример за минуту</a><a href="#simple">Почему просто</a><a href="#scheduler">Scheduler</a><a href="#content">Module + Content</a><a href="#network">Сеть</a><a href="#storage">Данные</a><a href="#reload">Reload и ownership</a><a href="#packages">.gmod</a><a href="#not">Чем Gincy не является</a></aside><article class="content">
-<section id="what"><h2>Что такое Gincy</h2><p><b>Gincy — фундамент для разработки больших GMod-систем.</b> Это не DarkRP, не готовый RP-режим и не новый язык. Это слой поверх GLua, который решает повторяющиеся технические задачи за тебя.</p><div class="plain"><b>Если совсем просто:</b> раньше ты сам следил за <code>hook.Add</code>, <code>timer.Create</code>, <code>net.Receive</code>, SQL, зависимостями и перезагрузкой. В Gincy ты говоришь модулю, что нужно сделать, а framework сам связывает это с жизненным циклом модуля, проверяет данные и умеет показать, где возникла проблема.</div><div class="grid"><div class="card"><h3>Это всё ещё GLua</h3><p>Entities, players, hooks, VGUI, render, surface и остальные GMod API никуда не исчезают.</p></div><div class="card"><h3>Open source</h3><p>Core и native-часть можно изучать, собирать и расширять. Framework не требует строить сервер вокруг закрытой чёрной коробки.</p></div><div class="card"><h3>Не привязан к RP</h3><p>На Gincy можно строить RP, PvP, sandbox-системы, мини-игры или отдельные addons.</p></div><div class="card"><h3>Сложность спрятана</h3><p>Для обычной разработки есть Simple API. Context, ownership и низкоуровневые подсистемы нужны только когда тебе действительно нужен контроль.</p></div></div></section>
-<section id="gives"><h2>Что Gincy даёт сразу</h2><div class="tablewrap"><table><thead><tr><th>Задача</th><th>В Gincy</th></tr></thead><tbody><tr><td>Создать самостоятельную систему</td><td><code>Gincy.Module("combat")</code> — модуль получает своё имя, ресурсы и lifecycle.</td></tr><tr><td>Подписаться на событие GMod</td><td><code>MOD:Hook(...)</code> — hook автоматически исчезнет вместе с модулем.</td></tr><tr><td>Выполнить код позже/периодически</td><td><code>MOD:After</code>, <code>MOD:Every</code>, <code>MOD:PlayersEvery</code> — через общий Scheduler вместо россыпи независимых timers.</td></tr><tr><td>Передать данные клиенту/серверу</td><td><code>MOD:Net</code>, <code>MOD:Receive</code>, <code>MOD:Send</code> — schema и проверка данных поверх Gincy Network.</td></tr><tr><td>Добавлять предметы/скиллы без пересборки системы</td><td><code>MOD:Content</code> объявляет тип, а сами записи живут отдельно в <code>gincy_content/</code>.</td></tr><tr><td>Хранить состояние</td><td><code>MOD:Storage</code> и расширенный Storage API поверх асинхронного persistence layer.</td></tr><tr><td>Понять, что тормозит или сломалось</td><td>CLI, scheduler metrics, network/profile/errors и Management API.</td></tr><tr><td>Отдать production-модуль</td><td>Подписанный <code>.gmod</code> с проверкой и режимами защиты.</td></tr></tbody></table></div></section>
-<section id="start"><h2>Модуль за минуту</h2><p>Для большинства кода начинать нужно не с <code>ctx</code>, а с Simple API:</p><pre><code>local MOD = Gincy.Module("welcome")
-
-MOD:Hook("PlayerInitialSpawn", function(ply)
-    print("Welcome, " .. ply:Nick())
-end)
-
-MOD:After(5, function()
-    print("Module is alive")
-end)</code></pre><p>Это уже полноценный Gincy-модуль. Зарегистрированные через него ресурсы принадлежат <code>welcome</code>. При unload/reload framework может убрать старые регистрации вместо того, чтобы оставлять забытые callbacks.</p><div class="plain good"><b>Главная идея:</b> сначала пользуйся <code>MOD:...</code>. В <a href="api.html#context">Context</a> лезь только тогда, когда Simple API тебе реально недостаточно.</div></section>
-<section id="simple"><h2>Simple API сверху, мощный Core снизу</h2><p><code>MOD:Every()</code> выглядит как простой метод, но под ним работает ownership и Scheduler. <code>MOD:Net()</code> скрывает регистрацию route и schema. <code>MOD:Content()</code> создаёт принадлежащий модулю Content Type. Это один и тот же Core — Simple API не является второй параллельной системой.</p><pre><code>local MOD = Gincy.Module("combat")
-
-MOD:Every("cleanup", 30, {
-    precision = "relaxed"
-}, function()
-    -- фоновая работа
-end)
-
-MOD:Net("select_skill", {
-    skill = "string"
-})
+<div class="layout"><aside class="toc"><a href="#what">Что такое Gincy</a><a href="#gives">Что он берёт на себя</a><a href="#start">Пример за минуту</a><a href="#simple">Обычный GLua</a><a href="#scheduler">Задачи по времени</a><a href="#content">Модуль и контент</a><a href="#network">Сеть</a><a href="#storage">Сохранения</a><a href="#reload">Перезагрузка</a><a href="#packages">Файл .gmod</a><a href="#not">Чего Gincy не делает</a></aside><article class="content">
+<section id="what"><h2>Что такое Gincy</h2><p>Gincy — каркас для серверных систем Garry's Mod. Боевая система, инвентарь, HUD, работы, транспорт: каждая такая система живёт отдельным модулем. Игровые числа, которые ты меняешь каждую неделю — урон фаербола, цена предмета, цвет HUD — лежат отдельно, в контенте, и не требуют новой сборки модуля.</p><p>Обычный аддон на <code>hook.Add</code> и <code>timer.Create</code> продолжает работать. Gincy нужен, когда таких аддонов несколько и их надо выключать, обновлять и не оставлять старые таймеры после перезагрузки.</p></section>
+<section id="gives"><h2>Что он берёт на себя</h2><div class="grid"><div class="card"><h3>Модуль</h3><p>Одна система: код, хуки, сеть и правила для контента. На сервере это папка dev или файл <code>.gmod</code> в production.</p></div><div class="card"><h3>Контент</h3><p>Открытые файлы навыков, предметов, рецептов. Их можно поменять, не пересобирая модуль.</p></div><div class="card"><h3>Задачи по времени</h3><p>Один общий планировщик вместо сотен <code>timer.Create</code>. Задача помнит, какому модулю она принадлежит.</p></div><div class="card"><h3>Сеть</h3><p>Сообщение описывается полями. Чужой тип или лишний ключ не попадает в твою функцию.</p></div><div class="card"><h3>Сохранения</h3><p>PostgreSQL по желанию. Если ни один модуль его не просит, сервер спокойно работает без базы.</p></div><div class="card"><h3>Пакет .gmod</h3><p>Готовый модуль для выдачи на сервер. Исходники контента в этот файл класть не нужно.</p></div></div></section>
+<section id="start"><h2>Пример за минуту</h2><p>В консоли сервера:</p><pre><code>gincy create module stamina</code></pre><p>Появится папка <code>garrysmod/gincy_dev/modules/stamina/</code> с <code>manifest.lua</code> и <code>sh_init.lua</code>. В <code>sh_init.lua</code> уже есть <code>Gincy.Module("stamina")</code>. Дальше ты дописываешь хуки и задачи так, как в блоке справа вверху.</p><p>Пока сервер в режиме разработки (<code>gincy/runtime.json</code>, поле <code>development</code> равно <code>true</code>), Gincy читает модули из <code>gincy_dev/modules</code>. Готовые пакеты он читает из <code>gincy_modules/*.gmod</code>.</p><div class="plain good"><b>С чего начать в справочнике:</b> <a href="api/module/module.html">Gincy.Module</a>, затем <a href="api/module/hook.html">MOD:Hook</a> и <a href="api/module/every.html">MOD:Every</a>.</div></section>
+<section id="simple"><h2>Это всё ещё GLua</h2><p>Обычный хук:</p><pre><code>hook.Add("PlayerSpawn", "Stamina.Spawn", function(ply)
+    ply:SetNWInt("Stamina", 100)
+end)</code></pre><p>Тот же хук через модуль:</p><pre><code>MOD:Hook("PlayerSpawn", function(ply)
+    ply:SetNWInt("Stamina", 100)
+end)</code></pre><p><code>hook.Add</code> остаётся в игре навсегда, пока ты сам не вызовешь <code>hook.Remove</code>. <code>MOD:Hook</code> делает тот же <code>hook.Add</code>, но запоминает имя хука. Когда модуль выгружают или перезагружают, Gincy вызывает <code>hook.Remove</code> сам.</p><p>То же с временем. <code>timer.Create</code> живёт, пока его не удалят. <code>MOD:Every</code> ставит задачу в общий планировщик Gincy, и при выгрузке модуля задача отменяется.</p></section>
+<section id="scheduler"><h2>Задачи по времени</h2><p><code>MOD:After(5, fn)</code> — один раз через 5 секунд. <code>MOD:Every(1, fn)</code> — снова и снова раз в секунду. <code>MOD:PlayersEvery</code> обходит игроков одним общим тиком, а не отдельным таймером на каждого человека.</p><p>Если игрок вышел, задача, привязанная к нему, больше не вызывается. Если функция 8 раз подряд падает с ошибкой, планировщик её выключает и пишет это в консоль, а остальные задачи продолжают идти.</p><p>Смотреть, кто грузит сервер: <code>gincy scheduler</code> и <code>gincy scheduler inspect имя</code>.</p></section>
+<section id="content"><h2>Модуль и контент</h2><p>Модуль — это код системы. Контент — это данные, которые эта система читает.</p><pre><code>Combat.gmod          -- код боя, его редко пересобирают
+gincy_content/combat/skill/fireball.lua
+gincy_content/combat/skill/dash.lua</code></pre><p>Модуль один раз объявляет, какие поля есть у навыка. Файл навыка просто возвращает таблицу: имя, урон, перезарядка. Добавить молнию — значит положить новый файл. <code>Combat.gmod</code> из-за этого заново не собирается и не перезагружается.</p><p>Если в новой версии файла написано <code>cooldown = "fast"</code>, а поле должно быть числом, Gincy не подменяет рабочий навык. Старый фаербол остаётся, ошибка пишется в диагностику.</p></section>
+<section id="network"><h2>Сеть</h2><p>Вместо ручного <code>net.WriteString</code> ты описываешь поля:</p><pre><code>MOD:Net("select_skill", { skill = "string" })
 
 MOD:Receive("select_skill", function(ply, data)
-    print(ply, data.skill)
-end)</code></pre></section>
-<section id="scheduler"><h2>Scheduler вместо сотен независимых timers</h2><p>Gincy имеет централизованный Scheduler. Задачи принадлежат модулю или Content, умеют автоматически отменяться, профилируются и не требуют линейно обходить все задачи каждый tick.</p><div class="grid"><div class="card"><h3>After</h3><p>Одно выполнение через заданное время.</p></div><div class="card"><h3>Every</h3><p>Периодическая задача с именем, режимом точности и владельцем.</p></div><div class="card"><h3>PlayersEvery</h3><p>Типичный обход игроков без отдельного timer на каждого. Работу можно распределить между ticks.</p></div><div class="card"><h3>Автоочистка</h3><p>Unload модуля, reload Content или disconnect привязанного игрока отменяет принадлежащую работу.</p></div></div><pre><code>MOD:PlayersEvery("status", 1, {
-    spread = true,
-    batch = 20
-}, function(ply)
-    -- Gincy может распределить игроков по ticks
-end)</code></pre></section>
-<section id="content"><h2>Module создаёт возможности. Content собирает из них игру.</h2><p><b>Module</b> — сама система: Combat, Inventory, HUD, Vehicles. <b>Content</b> — то, что часто меняется: конкретные skills, items, recipes, настройки HUD и другие определения.</p><pre><code>local MOD = Gincy.Module("combat")
-
-MOD:Content("skill", {
-    name = "string",
-    damage = "number",
-    cooldown = "number"
-})</code></pre><p>После этого конкретный Fireball может жить отдельно от Combat:</p><pre><code>-- gincy_content/combat/...
-return {
-    name = "Fireball",
-    damage = 50,
-    cooldown = 4
-}</code></pre><div class="plain"><b>Зачем:</b> добавление нового skill или изменение <code>damage = 50</code> на <code>45</code> не должно требовать пересборки <code>Combat.gmod</code>. Сам модуль меняется, когда меняется механика или его публичные возможности.</div><p>Сложные Content Types могут дополнительно задавать validation, lifecycle и ограниченные capabilities. Content может иметь поведение, но получает только те возможности, которые ему открыл владелец типа.</p></section>
-<section id="network"><h2>Сеть без постоянного boilerplate</h2><pre><code>MOD:Net("equip", {
-    item = "string"
-})
-
-MOD:Receive("equip", function(ply, data)
-    -- data уже прошли schema validation
-end)
-
-MOD:Send("equip", ply, {
-    item = "medkit"
-})</code></pre><p>Внутри остаётся полноценный Gincy Network: routes, schemas, rate limits, request/response, replicated state, streams, dictionaries и диагностика. Simple API нужен, чтобы для обычного сообщения не изучать всё это заранее.</p></section>
-<section id="storage"><h2>Хранение данных</h2><p>Для модуля можно создать собственное namespace-хранилище:</p><pre><code>local users = MOD:Storage("users")
-
-users:Set(ply:SteamID64(), {
-    level = 12
-}, function(ok, err)
-end)</code></pre><p>Storage остаётся асинхронным. PostgreSQL не является обязательным для Core, если активным модулям persistence не нужен. Для сложных случаев доступны repositories, transactions, migrations и низкоуровневый Storage API.</p></section>
-<section id="reload"><h2>Ownership и reload</h2><p>Главная причина существования Context внутри Gincy — знать, <b>кому принадлежит ресурс</b>. Simple API делает эту привязку автоматически.</p><pre><code>MOD:Hook(...)       -- принадлежит Module
-MOD:Every(...)      -- принадлежит Module
-MOD:Net(...)        -- принадлежит Module
-MOD:Content(...)    -- тип принадлежит Module</code></pre><p>У Content есть собственное поколение и lifecycle. При неудачном hot reload новая версия отклоняется, а предыдущая рабочая версия может остаться активной. Подробнее про Context, поколения и cleanup — в <a href="api.html#context">API</a>.</p></section>
-<section id="packages"><h2>Разработка открытым GLua, production через .gmod</h2><p>Во время разработки модуль остаётся обычным исходным кодом в <code>gincy_dev/modules/</code>. Production-модуль можно собрать в <code>.gmod</code>. Content при этом остаётся отдельно и не обязан упаковываться вместе с системой.</p><div class="flow"><div class="flowstep"><span>1</span><b>Пишешь GLua</b><p>Обычные файлы, нормальная отладка.</p></div><div class="arrow">→</div><div class="flowstep"><span>2</span><b>Тестируешь</b><p>Simple/Advanced API и hot reload.</p></div><div class="arrow">→</div><div class="flowstep"><span>3</span><b>Build</b><p><code>gincy package build</code>.</p></div><div class="arrow">→</div><div class="flowstep"><span>4</span><b>.gmod</b><p>Подпись, проверка и выбранный protection mode.</p></div></div></section>
-<section id="not"><h2>Чем Gincy не является</h2><div class="grid"><div class="card"><h3>Не новый язык</h3><p>Ты не обязан забывать GLua или GMod API.</p></div><div class="card"><h3>Не RP framework</h3><p>Core не диктует jobs, economy, characters или конкретный gameplay.</p></div><div class="card"><h3>Не магическая оптимизация</h3><p>Плохой callback останется плохим callback. Gincy даёт планирование, ownership и метрики, чтобы им было проще управлять.</p></div><div class="card"><h3>Не абсолютный DRM</h3><p><code>.gmod</code> повышает стоимость извлечения и защищает поставку, но владелец машины теоретически может анализировать исполняемый процесс.</p></div></div><p>Если ты уже понял главную страницу, дальше тебе нужен <a href="api.html">полный API</a>: там описаны Simple API, <code>ctx</code>, Scheduler, Content, Network, Storage, Schema и остальные открытые интерфейсы.</p></section>
-</article></div></main><footer class="footer"><div class="footerin"><span>Gincy SDK · open-source Garry's Mod framework</span><a href="https://github.com/Furuta05/gincy_sdk">GitHub repository</a></div></footer><script src="app.js"></script></body></html>
+    print(data.skill)
+end)</code></pre><p>Имя на проводе будет <code>stamina.select_skill</code>, если модуль называется <code>stamina</code>. Чужое поле или строка вместо числа до твоей функции не дойдут. Лимит скорости для такого сообщения — 8 в секунду, направление сразу в обе стороны. Это значения, которые ставит <code>MOD:Net</code>. Более тонкая настройка есть у <code>ctx.Network:Register</code>.</p></section>
+<section id="storage"><h2>Сохранения</h2><p>База не обязательна. Если ни один включённый модуль не просит запись, состояние «PostgreSQL не настроен» — не поломка сервера.</p><p>Простое сохранение:</p><pre><code>local players = MOD:Storage("players")
+players:Set(steam, { stamina = 40 }, function(ok) end)
+players:Get(steam, function(ok, value) end)</code></pre><p>Вызов не останавливает сервер в ожидании базы. Ответ приходит в функцию, которую ты передал последним аргументом. Пароль Gincy не печатает ни в <code>gincy storage status</code>, ни в JSON.</p></section>
+<section id="reload"><h2>Перезагрузка</h2><p>У каждой загрузки модуля есть свой набор созданных вещей: хуки, задачи, сетевые обработчики, типы контента. При <code>gincy module reload имя</code> старый набор снимается, затем выполняется новый код. Горячая перезагрузка срабатывает только если в <code>manifest.lua</code> написано <code>reload = "MODULE_HOT_SWAP"</code>. Иначе команда вернёт, что нужен перезапуск карты.</p><p>Смена файла контента модуль не перезагружает. Меняется только этот навык или предмет.</p></section>
+<section id="packages"><h2>Файл .gmod</h2><p><code>.gmod</code> — это собранный модуль для сервера, а не контейнер для каждого фаербола. Сборка:</p><pre><code>gincy package build garrysmod/gincy_dev/modules/stamina --key signer.pem</code></pre><p>Готовый файл попадает в <code>garrysmod/gincy_modules/stamina.gmod</code>. Без флагов режим <code>open</code>: сервер компилирует код как обычный Lua. <code>--protected</code> закрывает файлы модуля. <code>--maximum</code> дополнительно собирает клиентский код во внутреннюю программу GVM. Контент в <code>gincy_content</code> при этом остаётся обычными lua-файлами.</p></section>
+<section id="not"><h2>Чего Gincy не делает</h2><div class="grid"><div class="card"><h3>Не новый язык</h3><p><code>if</code>, <code>function</code>, <code>player.GetAll</code> и SWEP пишутся как раньше.</p></div><div class="card"><h3>Не готовый DarkRP</h3><p>Работы, экономика и персонажи — это уже твои модули, не ядро.</p></div><div class="card"><h3>Не ускоряет плохой код</h3><p>Тяжёлая функция останется тяжёлой. Gincy только не даёт ей свалить остальные задачи и показывает, сколько она ест.</p></div><div class="card"><h3>Не прячет сервер от владельца машины</h3><p>Пакет с <code>--protected</code> усложняет копирование модуля. Это не абсолютная защита процесса.</p></div></div><p>Дальше каждая функция разобрана отдельно: <a href="api.html">открыть API</a>.</p></section>
+</article></div></main><footer class="footer"><div class="footerin"><span>Gincy SDK · open-source Garry's Mod framework</span><a href="https://github.com/Furuta05/gincy_sdk">GitHub repository</a></div></footer><script src="app.js?v=3.3.1"></script></body></html>

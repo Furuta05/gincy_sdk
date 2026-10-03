@@ -1,7 +1,0 @@
-{
-  "name": "gincy-verification",
-  "private": true,
-  "type": "module",
-  "scripts": { "test": "node database.mjs" },
-  "devDependencies": { "@electric-sql/pglite": "0.5.8", "@electric-sql/pglite-socket": "0.2.11" }
-}
