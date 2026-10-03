@@ -1,0 +1,8 @@
+{
+  "name": "gincy-core",
+  "version-string": "3.3.0",
+  "dependencies": [
+    "openssl",
+    "libpq"
+  ]
+}

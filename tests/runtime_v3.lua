@@ -1,4 +1,13 @@
 local root=arg[1] or "."
+do
+    local function compat(root)
+        for _, path in ipairs({root .. "/source/tests/compat.lua", root .. "/tests/compat.lua"}) do
+            local file = io.open(path, "rb")
+            if file then file:close() dofile(path) return end
+        end
+    end
+    compat(root)
+end
 SERVER,CLIENT=true,false
 local hooks,timers,receivers,sent={},{},{},{}
 local now=0
@@ -16,7 +25,7 @@ net={Receive=function(id,fn) receivers[id]=fn end,Start=function() end,WriteUInt
 player={GetAll=function() return {} end}
 CompileString=function(text,name) local fn,err=loadstring(text,name) return fn or err end
 local c=root .. "/garrysmod/gamemodes/gincy/gamemode/core/"
-for _,name in ipairs({"sh_version.lua","sh_api.lua","sh_schema.lua","sh_content.lua","sh_context.lua","sh_network.lua","sh_loader.lua"}) do dofile(c .. name) end
+for _,name in ipairs({"sh_version.lua","sh_api.lua","sh_schema.lua","sh_content.lua","sh_content_runtime.lua","sh_scheduler.lua","sh_context.lua","sh_network.lua","sh_loader.lua"}) do dofile(c .. name) end
 local I=Gincy.Internal
 local assertions=0
 local function check(ok,why) assert(ok,why) assertions=assertions+1 end

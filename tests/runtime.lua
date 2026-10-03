@@ -1,4 +1,12 @@
 local root = arg[1] or "."
+local function compat(root)
+    local candidates = {root .. "/source/tests/compat.lua", root .. "/tests/compat.lua"}
+    for _, path in ipairs(candidates) do
+        local file = io.open(path, "rb")
+        if file then file:close() dofile(path) return end
+    end
+end
+compat(root)
 local core = root .. "/garrysmod/gamemodes/gincy/gamemode/core/"
 SERVER, CLIENT = true, false
 local hooks, timers, commands = {}, {}, {}
@@ -28,7 +36,7 @@ utf8 = {len = string.len}
 game = {GetMap = function() return "test_map" end}
 local assertions = 0
 local function check(condition, name) assert(condition, name) assertions = assertions + 1 end
-for _, name in ipairs({"sh_version.lua","sh_api.lua","sh_schema.lua","sh_content.lua","sh_context.lua","sh_loader.lua","sv_database.lua"}) do dofile(core .. name) end
+for _, name in ipairs({"sh_version.lua","sh_api.lua","sh_schema.lua","sh_content.lua","sh_content_runtime.lua","sh_scheduler.lua","sh_context.lua","sh_loader.lua","sv_database.lua"}) do dofile(core .. name) end
 local gincy = root .. "/garrysmod/lua/gincy/"
 for _,name in ipairs({"attributes/sh_attributes.lua","skills/sh_skills.lua","items/sh_items.lua","inventory/sh_inventory.lua","characters/sh_characters.lua","characters/sh_network.lua","interactions/sh_interactions.lua","status/sh_status.lua","worldobjects/sh_worldobjects.lua","activities/sh_activities.lua","organizations/sh_organizations.lua","director/sh_director.lua","inventory/sv_inventory.lua","characters/sv_characters.lua"}) do dofile(gincy .. name) end
 local I = Gincy.Internal
@@ -97,7 +105,10 @@ I.Run({"same"},{{sql="test"}},function(ok,rows,code) blocked=not ok and code=="B
 check(blocked,"overlap protection")
 pending(true,{})
 Gincy.Skills.Unregister("gathering")
-local fixture=dofile(root .. "/tests/package_fixture.lua")
+local fixturePath = root .. "/tests/package_fixture.lua"
+local fixtureFile = io.open(fixturePath, "rb")
+if not fixtureFile then fixturePath = root .. "/source/tests/package_fixture.lua" else fixtureFile:close() end
+local fixture=dofile(fixturePath)
 I.DB.Ready=true
 I.Candidates[fixture.manifest.id]=fixture
 I.MigrateModule=function(_,callback) callback(true) end

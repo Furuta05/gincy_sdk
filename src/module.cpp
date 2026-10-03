@@ -326,6 +326,28 @@ LUA_FUNCTION(http_reply) {
     LUA->PushBool(true);
     return 1;
 }
+LUA_FUNCTION(write_text) {
+    try {
+        auto relative = readString(LUA, 1, 240);
+        if (relative.find("..") != std::string::npos || relative.find('\\') != std::string::npos) return fail(LUA, "invalid path");
+        bool allowed = relative.rfind("gincy_dev/modules/", 0) == 0 || relative.rfind("gincy_dev/content/", 0) == 0 || relative.rfind("gincy_content/", 0) == 0;
+        if (!allowed) return fail(LUA, "path is outside the Gincy content trees");
+        if (!LUA->IsType(2, GarrysMod::Lua::Type::String)) return fail(LUA, "expected text");
+        unsigned size = 0;
+        const char* bytes = LUA->GetString(2, &size);
+        if (size > 1024 * 1024) return fail(LUA, "file too large");
+        auto slash = relative.rfind('/');
+        if (slash != std::string::npos) {
+            std::string error;
+            if (!gincy::ensureDirectories({"garrysmod/" + relative.substr(0, slash)}, error)) return fail(LUA, error.c_str());
+        }
+        std::ofstream output(std::string("garrysmod/") + relative, std::ios::binary);
+        if (!output) return fail(LUA, "write failed");
+        output.write(bytes, static_cast<std::streamsize>(size));
+        LUA->PushBool(true);
+        return 1;
+    } catch (const std::exception& error) { return fail(LUA, error.what()); }
+}
 LUA_FUNCTION(write_module_file) {
     try {
         auto relative = readString(LUA, 1, 240);
@@ -388,7 +410,7 @@ GMOD_MODULE_OPEN() {
         {"load_entry", load_entry}, {"verify_package", verify_package}, {"configure", configure}, {"submit", submit}, {"poll", poll}, {"stats", stats}, {"shutdown", shutdown},
         {"version", version_info}, {"ensure_layout", ensure_layout}, {"random_token", random_token},
         {"http_start", http_start}, {"http_poll", http_poll}, {"http_reply", http_reply}, {"http_stop", http_stop}, {"http_running", http_running}, {"write_module_file", write_module_file},
-        {"compile_client", compile_client}, {"generate_identity", generate_identity}}) {
+        {"compile_client", compile_client}, {"generate_identity", generate_identity}, {"write_text", write_text}}) {
         LUA->PushCFunction(entry.second);
         LUA->SetField(-2, entry.first);
     }

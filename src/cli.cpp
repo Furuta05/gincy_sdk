@@ -217,7 +217,8 @@ int usage() {
               << "  gincy version\n"
               << "  gincy doctor\n"
               << "  gincy errors explain <code>\n"
-              << "  gincy package build <dir> --key signer.pem --output out.gmod\n"
+              << "  gincy package build <dir> --key signer.pem [--output out.gmod]\n"
+              << "  gincy package build-all <modules-dir> --key signer.pem [--output-dir garrysmod/gincy_modules]\n"
               << "      [--protected] [--maximum] [--drm] [--fingerprint build|recipient]\n"
               << "      [--recipient server.pub.pem] [--allow-fallback] [--unpack]\n"
               << "  gincy package inspect <package> [--public-key trust.pem] [--json]\n"
@@ -304,15 +305,48 @@ int main(int argc, char** argv) {
             std::cout << "wrote " << argv[2] << "\n";
             return 0;
         }
+        if (command == "build-all") {
+            if (argc <= pathIndex) return usage();
+            auto keyPath = flag(argc, argv, "--key");
+            auto outputDir = flag(argc, argv, "--output-dir");
+            if (keyPath.empty()) return usage();
+            if (outputDir.empty()) outputDir = "garrysmod/gincy_modules";
+            fs::create_directories(outputDir);
+            int built = 0;
+            for (const auto& entry : fs::directory_iterator(argv[pathIndex])) {
+                if (!entry.is_directory()) continue;
+                auto manifestPath = entry.path() / "manifest.lua";
+                if (!fs::exists(manifestPath)) continue;
+                Lexer lexer{readAll(manifestPath)};
+                auto manifest = parseLua(lexer);
+                gincy::PackRequest request;
+                request.manifestJson = manifest.dump();
+                request.files = collect(entry.path());
+                request.privateKeyPem = readAll(keyPath);
+                auto bytes = gincy::packPackage(request);
+                auto id = field(manifest, "id", entry.path().filename().string());
+                auto output = fs::path(outputDir) / (id + ".gmod");
+                writeAll(output, bytes);
+                std::cout << output.string() << " " << bytes.size() << "\n";
+                ++built;
+            }
+            if (!built) {
+                std::cerr << "No modules with manifest.lua under " << argv[pathIndex] << "\n";
+                return 1;
+            }
+            std::cout << "Built " << built << " module(s) into " << outputDir << "\n";
+            return 0;
+        }
         if (command == "pack" || command == "sign") {
             if (argc <= pathIndex) return usage();
             auto keyPath = flag(argc, argv, "--key");
             auto output = flag(argc, argv, "--output");
             auto recipient = flag(argc, argv, "--recipient");
-            if (keyPath.empty() || output.empty()) return usage();
+            if (keyPath.empty()) return usage();
             auto manifestPath = findManifest(argv[pathIndex]);
             Lexer lexer{readAll(manifestPath)};
             auto manifest = parseLua(lexer);
+            if (output.empty()) output = (fs::path("garrysmod/gincy_modules") / (field(manifest, "id", "module") + ".gmod")).string();
             auto files = collect(manifestPath.parent_path());
             gincy::PackRequest request;
             request.manifestJson = manifest.dump();

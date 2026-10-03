@@ -1,9 +1,13 @@
 local root=arg[1] or "."
-dofile(root .. "/tests/runtime_v3.lua")
+local function existing(path)
+    local file=io.open(path,"rb")
+    if file then file:close() return path end
+end
+dofile(existing(root .. "/tests/runtime_v3.lua") or existing(root .. "/source/tests/runtime_v3.lua"))
 local I=Gincy.Internal
 Gincy.Content.Cleanup("fishing")
 local function candidate(id)
-    local directory=root .. "/examples/" .. id .. "/"
+    local directory=(existing(root .. "/examples/" .. id .. "/manifest.lua") or existing(root .. "/source/examples/" .. id .. "/manifest.lua")):gsub("manifest.lua$","")
     local manifest=assert(loadfile(directory .. "manifest.lua"))()
     local files={}
     for _,name in ipairs(manifest.entrypoints) do

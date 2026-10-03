@@ -1,5 +1,10 @@
 local root=arg[1] or "."
-dofile(root .. "/tests/runtime_v3.lua")
+local function existing(path)
+    local file=io.open(path,"rb")
+    if file then file:close() return path end
+end
+local suite=existing(root .. "/tests/runtime_v3.lua") or existing(root .. "/source/tests/runtime_v3.lua")
+dofile(suite)
 local I=Gincy.Internal
 I.RuntimeConfig={enabled={}}
 system={IsWindows=function() return false end}
